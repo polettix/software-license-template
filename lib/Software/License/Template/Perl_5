@@ -1,0 +1,28 @@
+__NAME__
+the same terms as the perl 5 programming language system itself
+__URL__
+http://dev.perl.org/licenses/
+__META_NAME__
+perl
+__META2_NAME__
+perl_5
+__NOTICE__
+This software is copyright (c) {{$self->year}} by {{$self->holder}}.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+__LICENSE__
+Terms of the Perl programming language system itself
+
+a) the GNU General Public License as published by the Free
+   Software Foundation; either version 1, or (at your option) any
+   later version, or
+b) the "Artistic License"
+
+--- {{ $self->_gpl->name }} ---
+
+{{$self->_gpl->fulltext}}
+
+--- {{ $self->_tal->name }} ---
+
+{{$self->_tal->fulltext}}

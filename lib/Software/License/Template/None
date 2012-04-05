@@ -1,0 +1,11 @@
+__NAME__
+"No License" License
+__META_NAME__
+restrictive
+__META2_NAME__
+restricted
+__NOTICE__
+This software is copyright (c) {{$self->year}} by {{$self->holder}}.  No
+license is granted to other entities.
+__LICENSE__
+All rights reserved.
