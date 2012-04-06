@@ -1,7 +1,7 @@
 __NAME__
 The Artistic License 1.0{{
    if (! $self->aggregation_clause) {
-      $OUT = <<' without Aggregation Clause';
+      $OUT = ' without Aggregation Clause';
    } 
 }}
 __URL__
