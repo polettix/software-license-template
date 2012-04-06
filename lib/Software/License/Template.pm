@@ -48,7 +48,7 @@ sub load_file {
    # strip last newline from all items
    for my $chunk (values %section_for) {
       $chunk =~ s{\n\z}{}mxs;
-      if ($self->{expand}) {
+      if (ref $self && $self->{expand}) {
          require Text::Template;
          $chunk = Text::Template->new(TYPE => 'STRING', SOURCE => $chunk,
             DELIMITERS => [qw< {{{{ }}}} >])->fill_in(HASH => { self => \$self });
@@ -61,7 +61,8 @@ sub load_file {
 
 sub license_directory {
    my ($self) = @_;
-   (my $packfile = ref($self) . '.pm') =~ s{::}{/}g;
+   my $package = ref $self || $self;
+   (my $packfile = $package . '.pm') =~ s{::}{/}g;
    (my $basedir = $INC{$packfile}) =~ s/\.pm$//mxs;
    return $basedir;
 }
@@ -78,7 +79,10 @@ sub load_license {
    my $path = $self->license_path($license);
    croak "cannot find template for license '$license' at '$path'"
       unless -r $path;
-   return $self->load_file($path);
+   my $default_path = $self->license_path('_default');
+   my %license = ($self->load_file($default_path), $self->load_file($path));
+   return %license if wantarray();
+   return \%license;
 }
 
 sub available_licenses {
