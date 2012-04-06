@@ -95,6 +95,7 @@ sub available_licenses {
    my ($volume, $directories) = splitpath($dir, 'no-file');
    my %data_for;
    for my $candidate (readdir $dh) {
+      next if index($candidate, '_') == 0;
       my $path = catpath($volume, $directories, $candidate);
       next if -d $path || ! -r $path;
       $data_for{$candidate} = $opts{load} ? $self->load_file($path) : $path;
