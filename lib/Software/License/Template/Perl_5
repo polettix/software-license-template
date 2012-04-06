@@ -11,6 +11,32 @@ This software is copyright (c) {{$self->year}} by {{$self->holder}}.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
+__FULL_LICENSE__
+Terms of the Perl programming language system itself
+
+a) the GNU General Public License as published by the Free
+   Software Foundation; either version 1, or (at your option) any
+   later version, or
+b) the "Artistic License"
+
+{{{{
+   my $slt = Software::License::Template->new();
+   for my $license (qw< GPL_1 Artistic_1_0 >) {
+      my $lic = $self->load_license($license);
+      for my $field (qw< name notice license >) {
+         $lic->{$field} = '' unless defined $lic->{$field};
+      }
+
+      $OUT .= <<"END_OF_OUT";
+--- $lic->{name} ---
+
+$lic->{notice}
+
+$lic->{license}
+
+END_OF_OUT
+   }
+}}}}
 __LICENSE__
 Terms of the Perl programming language system itself
 

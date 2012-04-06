@@ -5,16 +5,23 @@ package Software::License::Template;
 use strict;
 use warnings;
 use Carp;
-use Exporter qw< import>;
 use File::Spec::Functions qw< splitpath catpath >;
 
-our @EXPORT_OK = qw<
-   load_file
-   load_license
->;
+sub new {
+   my $package = shift;
+   my %opts = @_ && ref($_[0]) ? %{$_[0]} : @_;
+
+   # Text::Template expansion of templates delimited by {{{{ }}}}
+   # is triggered by default, you can pass expand => 0 to avoid
+   # this and avoid require-ing Text::Template as well
+   my $self = bless { expand => 1 }, $package;
+   $self->{expand} = $opts{expand} if exists $opts{expand};
+
+   return bless $self, $package;
+}
 
 sub load_file {
-   my ($filename) = @_;
+   my ($self, $filename) = @_;
 
    # Sections are kept inside a hash
    my %section_for;
@@ -39,36 +46,45 @@ sub load_file {
    close $fh;
 
    # strip last newline from all items
-   s{\n\z}{}mxs for values %section_for;
+   for my $chunk (values %section_for) {
+      $chunk =~ s{\n\z}{}mxs;
+      if ($self->{expand}) {
+         require Text::Template;
+         $chunk = Text::Template->new(TYPE => 'STRING', SOURCE => $chunk,
+            DELIMITERS => [qw< {{{{ }}}} >])->fill_in(HASH => { self => \$self });
+      }
+   }
 
    return %section_for if wantarray();
    return \%section_for;
 }
 
 sub license_directory {
-   (my $packfile = __PACKAGE__ . '.pm') =~ s{::}{/}g;
+   my ($self) = @_;
+   (my $packfile = ref($self) . '.pm') =~ s{::}{/}g;
    (my $basedir = $INC{$packfile}) =~ s/\.pm$//mxs;
    return $basedir;
 }
 
 sub license_path {
-   my ($license) = @_;
+   my ($self, $license) = @_;
    my ($volume, $directories)
-      = splitpath(license_directory(), 'no-file');
+      = splitpath($self->license_directory(), 'no-file');
    return catpath($volume, $directories, $license);
 }
 
 sub load_license {
-   my ($license) = @_;
-   my $path = license_path($license);
+   my ($self, $license) = @_;
+   my $path = $self->license_path($license);
    croak "cannot find template for license '$license' at '$path'"
       unless -r $path;
-   return load_file($path);
+   return $self->load_file($path);
 }
 
 sub available_licenses {
+   my $self = shift;
    my %opts = @_ && ref($_[0]) ? %{$_[0]} : @_;
-   my $dir = license_directory();
+   my $dir = $self->license_directory();
    opendir my $dh, $dir
       or croak "cannot opendir('$dir'): $!";
 
@@ -77,7 +93,7 @@ sub available_licenses {
    for my $candidate (readdir $dh) {
       my $path = catpath($volume, $directories, $candidate);
       next if -d $path || ! -r $path;
-      $data_for{$candidate} = $opts{load} ? load_file($path) : $path;
+      $data_for{$candidate} = $opts{load} ? $self->load_file($path) : $path;
    }
    closedir $dh;
 
